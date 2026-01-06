@@ -1,0 +1,55 @@
+{
+  "name": "kuiper-tts",
+  "version": "1.0.0",
+  "description": "Desktop application for TTS voice training",
+  "main": "electron/main.cjs",
+  "type": "module",
+  "author": {
+    "name": "Kuiper TTS Team"
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "electron:dev": "concurrently \"npm run dev\" \"wait-on http://localhost:5173 && electron .\"",
+    "electron:build": "npm run build && electron-builder",
+    "electron:build:mac": "npm run build && electron-builder --mac",
+    "electron:build:win": "npm run build && electron-builder --win",
+    "electron:build:linux": "npm run build && electron-builder --linux",
+    "electron:build:all": "npm run build && electron-builder -mwl",
+    "generate-icons": "node scripts/generate-icons.cjs",
+    "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
+    "clean": "rm -rf dist dist-electron node_modules/.vite",
+    "rebuild": "npm run clean && npm run build"
+  },
+  "dependencies": {
+    "framer-motion": "^10.16.0",
+    "lucide-react": "^0.294.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-router-dom": "^6.20.0",
+    "zustand": "^4.4.0"
+  },
+  "devDependencies": {
+    "@types/react": "^18.2.0",
+    "@types/react-dom": "^18.2.0",
+    "@vitejs/plugin-react": "^4.2.0",
+    "autoprefixer": "^10.4.16",
+    "concurrently": "^8.2.0",
+    "electron": "^28.0.0",
+    "electron-builder": "^24.9.0",
+    "eslint": "^8.55.0",
+    "eslint-plugin-react-hooks": "^4.6.0",
+    "eslint-plugin-react-refresh": "^0.4.5",
+    "png2icons": "^2.0.1",
+    "postcss": "^8.4.32",
+    "sharp": "^0.34.5",
+    "tailwindcss": "^3.3.6",
+    "typescript": "^5.3.0",
+    "vite": "^5.0.0",
+    "wait-on": "^7.2.0"
+  },
+  "build": {
+    "extends": "electron-builder.yml"
+  }
+}

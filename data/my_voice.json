@@ -1,0 +1,12 @@
+{
+  "audio": {
+    "sample_rate": 22050
+  },
+  "espeak": {
+    "voice": "en-us"
+  },
+  "trainer": {
+    "max_epochs": 2000,
+    "val_check_interval": 0.5
+  }
+}

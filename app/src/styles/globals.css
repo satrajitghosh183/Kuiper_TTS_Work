@@ -1,0 +1,206 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* StringTune Design System - Global Styles */
+
+@layer base {
+  /* Reset and base styles */
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  html {
+    font-size: 16px;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    @apply bg-background text-text-primary font-sans;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Focus styles */
+  :focus-visible {
+    @apply outline-none ring-2 ring-accent ring-offset-2 ring-offset-background;
+  }
+
+  /* Selection */
+  ::selection {
+    @apply bg-accent/30 text-text-primary;
+  }
+
+  /* Scrollbar styling */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    @apply bg-background;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply bg-border rounded-full;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-text-muted;
+  }
+}
+
+@layer components {
+  /* Button base styles */
+  .btn {
+    @apply inline-flex items-center justify-center gap-2;
+    @apply px-6 py-3 rounded-lg;
+    @apply font-medium text-body;
+    @apply transition-all duration-fast ease-default;
+    @apply cursor-pointer select-none;
+    @apply disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  .btn-primary {
+    @apply btn bg-accent text-text-primary;
+    @apply hover:bg-accent-hover hover:scale-[1.02];
+    @apply active:bg-accent-active active:scale-[0.98];
+  }
+
+  .btn-secondary {
+    @apply btn bg-transparent border border-border text-text-primary;
+    @apply hover:border-accent hover:text-accent;
+    @apply active:scale-[0.98];
+  }
+
+  .btn-ghost {
+    @apply btn bg-transparent text-text-secondary;
+    @apply hover:text-text-primary hover:bg-surface;
+    @apply active:scale-[0.98];
+  }
+
+  /* Card styles */
+  .card {
+    @apply bg-surface border border-border rounded-lg p-md;
+    @apply transition-all duration-standard ease-default;
+  }
+
+  .card-elevated {
+    @apply card shadow-card;
+    @apply hover:-translate-y-0.5 hover:shadow-card-hover;
+  }
+
+  /* Input styles */
+  .input {
+    @apply w-full bg-surface border border-border rounded-lg;
+    @apply px-4 py-3 text-text-primary placeholder:text-text-muted;
+    @apply transition-all duration-fast ease-default;
+    @apply focus:border-accent focus:shadow-glow;
+  }
+
+  .input-error {
+    @apply input border-accent bg-accent/5;
+  }
+
+  /* Progress bar */
+  .progress {
+    @apply h-1 bg-border rounded-full overflow-hidden;
+  }
+
+  .progress-bar {
+    @apply h-full bg-accent rounded-full;
+    @apply transition-all duration-slow ease-default;
+  }
+
+  /* Modal backdrop */
+  .modal-backdrop {
+    @apply fixed inset-0 bg-black/70 backdrop-blur-modal;
+    @apply flex items-center justify-center;
+    @apply animate-fade-in;
+  }
+
+  .modal-content {
+    @apply bg-surface border border-border rounded-xl;
+    @apply p-lg max-w-lg w-full mx-4;
+    @apply animate-scale-in;
+  }
+}
+
+@layer utilities {
+  /* Text gradient */
+  .text-gradient {
+    @apply bg-clip-text text-transparent;
+    @apply bg-gradient-to-r from-accent to-accent-hover;
+  }
+
+  /* Subtle grain texture overlay */
+  .grain {
+    position: relative;
+  }
+
+  .grain::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+    opacity: 0.03;
+    pointer-events: none;
+  }
+
+  /* Glow effect */
+  .glow {
+    @apply relative;
+  }
+
+  .glow::before {
+    content: '';
+    @apply absolute inset-0 -z-10;
+    @apply bg-accent/10 blur-xl rounded-full;
+  }
+
+  /* Draggable region for Electron */
+  .draggable {
+    -webkit-app-region: drag;
+  }
+
+  .no-drag {
+    -webkit-app-region: no-drag;
+  }
+
+  /* Hide scrollbar but keep functionality */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Stagger animation delay utilities */
+  .stagger-1 { animation-delay: 30ms; }
+  .stagger-2 { animation-delay: 60ms; }
+  .stagger-3 { animation-delay: 90ms; }
+  .stagger-4 { animation-delay: 120ms; }
+  .stagger-5 { animation-delay: 150ms; }
+  .stagger-6 { animation-delay: 180ms; }
+  .stagger-7 { animation-delay: 210ms; }
+  .stagger-8 { animation-delay: 240ms; }
+
+  /* Reduced motion support */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
+

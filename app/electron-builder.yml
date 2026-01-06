@@ -1,0 +1,193 @@
+# Kuiper TTS - Electron Builder Configuration
+# Build cross-platform desktop apps for Windows, macOS, and Linux
+
+appId: com.kuiper.tts
+productName: Kuiper TTS
+copyright: Copyright 2024 Kuiper TTS Team
+
+# Directories
+directories:
+  buildResources: resources
+  output: dist-electron
+
+# Files to include in the app
+files:
+  - dist/**/*
+  - electron/**/*
+  - "!**/*.map"
+  - "!**/node_modules/**/{CHANGELOG.md,README.md,readme.md,README,readme}"
+  - "!**/node_modules/**/{test,__tests__,tests,powered-test,example,examples}"
+  - "!**/node_modules/**/{*.d.ts,*.map}"
+  - "!**/{.DS_Store,.git,.hg,.svn,CVS,RCS,SCCS,__pycache__}"
+
+# Extra resources (Python backend and dependencies)
+extraResources:
+  # Include the backend Python code
+  - from: "../backend"
+    to: "backend"
+    filter:
+      - "**/*.py"
+      - "requirements.txt"
+      - "!**/__pycache__/**"
+      - "!**/*.pyc"
+      - "!**/*.pyo"
+  
+  # Include Piper TTS source
+  - from: "../piper1-gpl/src/piper"
+    to: "piper"
+    filter:
+      - "**/*.py"
+      - "**/*.so"
+      - "**/*.pyd"
+      - "**/*.json"
+      - "!**/__pycache__/**"
+      - "!**/*.pyc"
+  
+  # Include sample data directory structure
+  - from: "../data"
+    to: "data"
+    filter:
+      - "**/*.json"
+      - "!**/*.wav"
+      - "!cache/**"
+
+# ============================================================================
+# macOS Configuration
+# ============================================================================
+mac:
+  category: public.app-category.utilities
+  icon: resources/icons/icon.icns
+  target:
+    - target: dmg
+      arch:
+        - x64
+        - arm64
+    - target: zip
+      arch:
+        - x64
+        - arm64
+  hardenedRuntime: true
+  gatekeeperAssess: false
+  entitlements: resources/entitlements.mac.plist
+  entitlementsInherit: resources/entitlements.mac.plist
+  notarize: false
+  # Signing (set these environment variables for code signing)
+  # identity: null  # Set to your Apple Developer ID
+  
+dmg:
+  background: null
+  icon: resources/icons/icon.icns
+  iconSize: 128
+  contents:
+    - x: 130
+      y: 220
+    - x: 410
+      y: 220
+      type: link
+      path: /Applications
+  window:
+    width: 540
+    height: 380
+
+# ============================================================================
+# Windows Configuration
+# ============================================================================
+win:
+  icon: resources/icons/icon.ico
+  target:
+    - target: nsis
+      arch:
+        - x64
+    - target: portable
+      arch:
+        - x64
+  # Signing (set CSC_LINK and CSC_KEY_PASSWORD for code signing)
+  # certificateFile: null
+  # certificatePassword: null
+
+nsis:
+  oneClick: false
+  allowToChangeInstallationDirectory: true
+  deleteAppDataOnUninstall: false
+  createDesktopShortcut: true
+  createStartMenuShortcut: true
+  shortcutName: Kuiper TTS
+  installerIcon: resources/icons/icon.ico
+  uninstallerIcon: resources/icons/icon.ico
+  installerHeader: null
+  installerHeaderIcon: resources/icons/icon.ico
+  include: null
+  license: null
+  perMachine: false
+
+portable:
+  artifactName: "${productName}-${version}-portable.exe"
+
+# ============================================================================
+# Linux Configuration
+# ============================================================================
+linux:
+  icon: resources/icons
+  target:
+    - target: AppImage
+      arch:
+        - x64
+    - target: deb
+      arch:
+        - x64
+    - target: rpm
+      arch:
+        - x64
+  category: Audio
+  maintainer: Kuiper TTS Team <support@kuipertts.com>
+  description: Desktop application for training custom TTS voices with Piper
+  synopsis: Train your own text-to-speech voice
+  desktop:
+    Name: Kuiper TTS
+    Comment: Train custom text-to-speech voices
+    Categories: Audio;AudioVideo;Utility;
+    Keywords: tts;voice;speech;training;ai;
+    StartupWMClass: kuiper-tts
+
+appImage:
+  artifactName: "${productName}-${version}-${arch}.AppImage"
+  license: null
+
+deb:
+  packageCategory: sound
+  priority: optional
+  depends:
+    - python3
+    - python3-pip
+    - python3-venv
+    - libsndfile1
+    - portaudio19-dev
+  recommends:
+    - python3-dev
+
+rpm:
+  packageCategory: Applications/Multimedia
+  depends:
+    - python3
+    - python3-pip
+    - libsndfile
+    - portaudio
+
+# ============================================================================
+# Build Hooks
+# ============================================================================
+
+# After pack hook for additional setup
+afterPack: "./scripts/afterPack.cjs"
+
+# ============================================================================
+# Publishing (disabled by default)
+# ============================================================================
+publish: null
+
+# To enable GitHub releases, uncomment:
+# publish:
+#   provider: github
+#   owner: your-username
+#   repo: kuiper-tts
+#   releaseType: release
