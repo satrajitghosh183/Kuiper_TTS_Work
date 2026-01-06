@@ -1,0 +1,59 @@
+# ===========================================
+# PDF-to-LaTeX Celery Worker
+# Optimized for CPU-bound PDF processing
+# ===========================================
+
+FROM python:3.11-slim
+
+# Labels
+LABEL maintainer="PDF-to-LaTeX Team"
+LABEL version="1.0.0"
+LABEL description="PDF-to-LaTeX Celery Worker"
+
+# Environment variables
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    PYTHONPATH=/app \
+    PIP_NO_CACHE_DIR=1 \
+    PIP_DISABLE_PIP_VERSION_CHECK=1
+
+WORKDIR /app
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    # LaTeX for validation
+    texlive-latex-base \
+    texlive-latex-extra \
+    texlive-fonts-recommended \
+    texlive-science \
+    # PDF processing
+    poppler-utils \
+    # Image processing
+    libgl1-mesa-glx \
+    libglib2.0-0 \
+    libsm6 \
+    libxext6 \
+    libxrender-dev \
+    # Build tools
+    build-essential \
+    && rm -rf /var/lib/apt/lists/* \
+    && apt-get clean
+
+# Copy requirements and install
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy application code
+COPY app/ /app/app/
+COPY pyproject.toml /app/
+
+# Create non-root user
+RUN useradd -m -u 1000 -s /bin/bash appuser \
+    && mkdir -p /app/uploads /app/outputs /app/figures \
+    && chown -R appuser:appuser /app
+
+USER appuser
+
+# Default command - Celery worker
+CMD ["celery", "-A", "app.worker", "worker", "--loglevel=info", "--concurrency=2"]
+

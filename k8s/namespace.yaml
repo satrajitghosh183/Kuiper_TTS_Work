@@ -1,0 +1,9 @@
+# Kubernetes namespace for PDF-to-LaTeX
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: pdf-to-latex
+  labels:
+    app: pdf-to-latex
+    environment: production
+
