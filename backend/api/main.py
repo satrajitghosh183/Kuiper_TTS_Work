@@ -6,18 +6,13 @@ import json
 import os
 import sys
 import logging
+import logging.handlers
 from pathlib import Path
 from typing import Optional, List
 from contextlib import asynccontextmanager
+from time import time
 
-# Configure logging
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-)
-logger = logging.getLogger('kuiper.api')
-
-# Add parent directories to path for imports
+# Add parent directories to path for imports FIRST (before any local imports)
 _current_dir = Path(__file__).parent.resolve()
 _backend_dir = _current_dir.parent
 _project_dir = _backend_dir.parent
@@ -27,10 +22,47 @@ if str(_project_dir) not in sys.path:
 if str(_backend_dir) not in sys.path:
     sys.path.insert(0, str(_backend_dir))
 
-from fastapi import FastAPI, HTTPException, WebSocket, WebSocketDisconnect, UploadFile, File, Query
+# NOW import configuration (after path is set up)
+from core.config import get_settings, get_project_root, get_recordings_dir, get_data_dir
+
+# Configure logging based on settings
+settings = get_settings()
+log_level = getattr(logging, settings.log_level.upper(), logging.INFO)
+
+# Update project dir from settings if available
+_project_dir = get_project_root()
+
+# Create logs directory if log file is specified
+if settings.log_file:
+    settings.log_file.parent.mkdir(parents=True, exist_ok=True)
+    handler = logging.handlers.RotatingFileHandler(
+        settings.log_file,
+        maxBytes=10 * 1024 * 1024,  # 10MB
+        backupCount=5
+    )
+    handler.setFormatter(logging.Formatter(
+        '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    ))
+    logging.basicConfig(
+        level=log_level,
+        handlers=[handler, logging.StreamHandler()],
+        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    )
+else:
+    logging.basicConfig(
+        level=log_level,
+        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    )
+
+logger = logging.getLogger('kuiper.api')
+
+from fastapi import FastAPI, HTTPException, WebSocket, WebSocketDisconnect, UploadFile, File, Query, Request, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, JSONResponse
-from pydantic import BaseModel, Field
+from fastapi.middleware.trustedhost import TrustedHostMiddleware
+from fastapi.exceptions import RequestValidationError
+from pydantic import BaseModel, Field, ValidationError
+from starlette.exceptions import HTTPException as StarletteHTTPException
 
 # Import from core modules using relative paths
 from core import (
@@ -51,12 +83,15 @@ class AppState:
     
     def __init__(self):
         self.config = KuiperConfig()
+        self.config.recordings_dir = get_recordings_dir()
+        self.config.root_dir = get_data_dir()
         self.system_analyzer = SystemAnalyzer()
         self.audio_processor = AudioProcessor(SAMPLE_RATE)
         self.trainer: Optional[Trainer] = None
         self.training_clients: List[WebSocket] = []
         self.system_report: Optional[SystemReport] = None
         self.scripts_cache: dict = {}  # Cache for loaded scripts
+        self.rate_limit_store: dict = {}  # Simple in-memory rate limiting
 
 
 state = AppState()
@@ -87,26 +122,90 @@ app = FastAPI(
     title="Kuiper TTS API",
     description="API for Kuiper TTS voice training",
     version="1.0.0",
-    lifespan=lifespan
+    lifespan=lifespan,
+    docs_url="/docs" if not settings.is_production else None,
+    redoc_url="/redoc" if not settings.is_production else None,
 )
 
-# CORS configuration for Electron
+# Security: Trusted Host Middleware (only in production)
+if settings.is_production:
+    app.add_middleware(
+        TrustedHostMiddleware,
+        allowed_hosts=["127.0.0.1", "localhost"]
+    )
+
+# CORS configuration - use settings
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=settings.cors_origins if settings.is_production else ["*"],
     allow_credentials=True,
-    allow_methods=["*"],
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allow_headers=["*"],
+    expose_headers=["*"],
 )
 
 
-# Exception handler for better error messages
+# Rate limiting middleware
+@app.middleware("http")
+async def rate_limit_middleware(request: Request, call_next):
+    """Simple rate limiting middleware."""
+    if settings.is_production and settings.rate_limit_per_minute > 0:
+        client_ip = request.client.host if request.client else "unknown"
+        current_time = time()
+        minute_ago = current_time - 60
+        
+        # Initialize store for this IP if needed
+        if client_ip not in state.rate_limit_store:
+            state.rate_limit_store[client_ip] = []
+        
+        # Clean old entries for this IP (older than 1 minute)
+        state.rate_limit_store[client_ip] = [
+            t for t in state.rate_limit_store[client_ip] if t > minute_ago
+        ]
+        
+        # Check rate limit
+        if len(state.rate_limit_store[client_ip]) >= settings.rate_limit_per_minute:
+            return JSONResponse(
+                status_code=429,
+                content={"detail": "Rate limit exceeded. Please try again later."}
+            )
+        
+        # Record request
+        state.rate_limit_store[client_ip].append(current_time)
+    
+    response = await call_next(request)
+    return response
+
+
+# Exception handlers
+@app.exception_handler(StarletteHTTPException)
+async def http_exception_handler(request: Request, exc: StarletteHTTPException):
+    """Handle HTTP exceptions."""
+    logger.warning(f"HTTP {exc.status_code}: {exc.detail}")
+    return JSONResponse(
+        status_code=exc.status_code,
+        content={"detail": exc.detail}
+    )
+
+
+@app.exception_handler(RequestValidationError)
+async def validation_exception_handler(request: Request, exc: RequestValidationError):
+    """Handle validation errors."""
+    logger.warning(f"Validation error: {exc.errors()}")
+    return JSONResponse(
+        status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+        content={"detail": "Validation error", "errors": exc.errors()}
+    )
+
+
 @app.exception_handler(Exception)
-async def global_exception_handler(request, exc):
+async def global_exception_handler(request: Request, exc: Exception):
+    """Handle all other exceptions."""
     logger.error(f"Unhandled exception: {exc}", exc_info=True)
+    error_detail = str(exc) if settings.debug else "An internal error occurred"
     return JSONResponse(
         status_code=500,
-        content={"detail": str(exc)}
+        content={"detail": error_detail}
     )
 
 
@@ -391,6 +490,11 @@ async def list_scripts(
 async def get_script(script_name: str):
     """Get a specific script by name."""
     try:
+        # Security: Prevent path traversal
+        script_name = Path(script_name).name  # Only get the filename
+        if ".." in script_name or "/" in script_name or "\\" in script_name:
+            raise HTTPException(400, "Invalid script name")
+        
         # Search for the script file
         script_path = _project_dir / f"{script_name}.txt"
         
@@ -399,6 +503,12 @@ async def get_script(script_name: str):
             script_path = _project_dir / script_name
             if not script_path.exists():
                 raise HTTPException(404, f"Script not found: {script_name}")
+        
+        # Security: Ensure path is within project directory
+        try:
+            script_path.resolve().relative_to(_project_dir.resolve())
+        except ValueError:
+            raise HTTPException(400, "Invalid script path")
         
         script = TextScript.from_file(script_path)
         return ScriptResponse(
@@ -423,6 +533,13 @@ async def list_audio_devices():
     """List available audio input devices."""
     try:
         devices = state.audio_processor.list_devices()
+        
+        if not devices:
+            logger.warning("No audio input devices found. Make sure:")
+            logger.warning("1. sounddevice is installed: pip install sounddevice")
+            logger.warning("2. Microphone permissions are granted (macOS: System Settings > Privacy & Security > Microphone)")
+            logger.warning("3. A microphone is connected and working")
+        
         return [
             AudioDeviceResponse(
                 device_id=d.device_id,
@@ -435,7 +552,8 @@ async def list_audio_devices():
         ]
     except Exception as e:
         logger.error(f"Failed to list audio devices: {e}")
-        raise HTTPException(500, f"Failed to list audio devices: {e}")
+        # Return empty list instead of raising error, so UI can show helpful message
+        return []
 
 
 @app.post("/api/audio/test", response_model=AudioTestResponse)
@@ -475,8 +593,21 @@ async def save_recording(
 ):
     """Save an uploaded audio recording. Accepts WAV, WebM, MP4, and other formats."""
     try:
+        # Validate file size
+        max_size_bytes = settings.max_upload_size_mb * 1024 * 1024
+        if audio_file.size and audio_file.size > max_size_bytes:
+            raise HTTPException(
+                413,
+                f"File too large. Maximum size is {settings.max_upload_size_mb}MB"
+            )
+        
         if not filename:
             filename = audio_file.filename or "recording.wav"
+        
+        # Security: Prevent path traversal attacks
+        filename = Path(filename).name  # Only get the filename, not the path
+        if ".." in filename or "/" in filename or "\\" in filename:
+            raise HTTPException(400, "Invalid filename")
         
         # Ensure .wav extension
         if not filename.lower().endswith('.wav'):
@@ -487,8 +618,21 @@ async def save_recording(
         recordings_dir.mkdir(parents=True, exist_ok=True)
         output_path = recordings_dir / filename
         
-        # Read audio data
+        # Security: Ensure output path is within recordings directory
+        try:
+            output_path.resolve().relative_to(recordings_dir.resolve())
+        except ValueError:
+            raise HTTPException(400, "Invalid file path")
+        
+        # Read audio data with size limit
         audio_data = await audio_file.read()
+        
+        # Check actual size after reading
+        if len(audio_data) > max_size_bytes:
+            raise HTTPException(
+                413,
+                f"File too large. Maximum size is {settings.max_upload_size_mb}MB"
+            )
         
         if len(audio_data) == 0:
             return {
@@ -1063,17 +1207,85 @@ async def export_voice(request: ExportVoiceRequest):
 
 
 # ============================================================================
+# Audio File Serving
+# ============================================================================
+
+@app.get("/api/voice/audio/{filename}")
+async def get_audio_file(filename: str):
+    """Serve synthesized audio files."""
+    try:
+        # Security: Prevent path traversal
+        filename = Path(filename).name  # Only get the filename
+        if ".." in filename or "/" in filename or "\\" in filename:
+            raise HTTPException(400, "Invalid filename")
+        
+        # Try output directory first
+        output_dir = _project_dir / "output"
+        audio_path = output_dir / filename
+        
+        # Security: Ensure path is within allowed directories
+        if audio_path.exists():
+            try:
+                audio_path.resolve().relative_to(output_dir.resolve())
+            except ValueError:
+                raise HTTPException(400, "Invalid file path")
+        else:
+            # Try recordings directory
+            recordings_dir = state.config.recordings_dir
+            audio_path = recordings_dir / filename
+            if audio_path.exists():
+                try:
+                    audio_path.resolve().relative_to(recordings_dir.resolve())
+                except ValueError:
+                    raise HTTPException(400, "Invalid file path")
+            
+        if not audio_path.exists():
+            raise HTTPException(404, f"Audio file not found: {filename}")
+        
+        return FileResponse(
+            path=str(audio_path),
+            media_type="audio/wav",
+            filename=filename
+        )
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Failed to serve audio file: {e}")
+        raise HTTPException(500, f"Failed to serve audio file: {e}")
+
+
+# ============================================================================
 # Health Check
 # ============================================================================
 
 @app.get("/api/health")
 async def health_check():
-    """Health check endpoint."""
-    return {
+    """Health check endpoint with detailed status."""
+    health_status = {
         "status": "healthy",
         "version": "1.0.0",
-        "training_active": state.trainer is not None and state.trainer.status == TrainingStatus.TRAINING
+        "environment": settings.environment,
+        "training_active": state.trainer is not None and state.trainer.status == TrainingStatus.TRAINING,
+        "system_analyzed": state.system_report is not None,
     }
+    
+    # Add system info if available
+    if state.system_report:
+        health_status["can_train"] = state.system_report.can_train
+        health_status["training_backend"] = state.system_report.training_backend
+    
+    # Check critical paths
+    try:
+        recordings_dir = state.config.recordings_dir
+        health_status["recordings_dir_accessible"] = recordings_dir.exists() or recordings_dir.parent.exists()
+    except Exception:
+        health_status["recordings_dir_accessible"] = False
+    
+    # Determine overall health
+    if not health_status.get("recordings_dir_accessible", True):
+        health_status["status"] = "degraded"
+    
+    return health_status
 
 
 # ============================================================================

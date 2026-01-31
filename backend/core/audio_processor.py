@@ -112,24 +112,36 @@ class AudioProcessor:
         Returns:
             List of AudioDeviceInfo for each input device
         """
-        self._ensure_dependencies()
-        sd = self._sounddevice
+        try:
+            self._ensure_dependencies()
+        except ImportError as e:
+            # Return empty list if dependencies aren't installed
+            return []
         
-        devices = []
-        all_devices = sd.query_devices()
-        default_input = sd.default.device[0]
-        
-        for i, device in enumerate(all_devices):
-            if device["max_input_channels"] > 0:
-                devices.append(AudioDeviceInfo(
-                    device_id=i,
-                    name=device["name"],
-                    channels=device["max_input_channels"],
-                    sample_rate=device["default_samplerate"],
-                    is_default=(i == default_input)
-                ))
-        
-        return devices
+        try:
+            sd = self._sounddevice
+            
+            devices = []
+            all_devices = sd.query_devices()
+            default_input = sd.default.device[0] if sd.default.device[0] is not None else -1
+            
+            for i, device in enumerate(all_devices):
+                if device.get("max_input_channels", 0) > 0:
+                    devices.append(AudioDeviceInfo(
+                        device_id=i,
+                        name=device.get("name", f"Device {i}"),
+                        channels=device.get("max_input_channels", 1),
+                        sample_rate=device.get("default_samplerate", self.sample_rate),
+                        is_default=(i == default_input)
+                    ))
+            
+            return devices
+        except Exception as e:
+            # Log error but return empty list instead of crashing
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.error(f"Failed to list audio devices: {e}")
+            return []
     
     def get_default_device(self) -> Optional[AudioDeviceInfo]:
         """

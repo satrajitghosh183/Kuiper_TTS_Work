@@ -164,9 +164,22 @@ export function Setup() {
 
           <div className="space-y-2">
             {devices.length === 0 ? (
-              <p className="text-caption text-text-muted py-4 text-center">
-                {isLoadingDevices ? 'Loading devices...' : 'No microphones found'}
-              </p>
+              <div className="py-4 text-center space-y-2">
+                <p className="text-caption text-text-muted">
+                  {isLoadingDevices ? 'Loading devices...' : 'No microphones found'}
+                </p>
+                {!isLoadingDevices && (
+                  <div className="mt-4 p-4 bg-yellow-500/10 border border-yellow-500/20 rounded-lg text-left max-w-md mx-auto">
+                    <p className="text-caption text-yellow-400 font-medium mb-2">Troubleshooting:</p>
+                    <ul className="text-caption text-text-secondary space-y-1 list-disc list-inside">
+                      <li>Make sure a microphone is connected</li>
+                      <li>Check microphone permissions (macOS: System Settings → Privacy & Security → Microphone)</li>
+                      <li>Ensure sounddevice is installed: <code className="text-accent">pip install sounddevice</code></li>
+                      <li>Try restarting the backend server</li>
+                    </ul>
+                  </div>
+                )}
+              </div>
             ) : (
               devices.map((device) => (
                 <button

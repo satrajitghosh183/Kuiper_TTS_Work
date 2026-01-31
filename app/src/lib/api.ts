@@ -8,6 +8,11 @@ function getApiBase(): string {
   return `http://127.0.0.1:${apiPort}/api`
 }
 
+// Get the server base URL (without /api)
+export function getServerBase(): string {
+  return `http://127.0.0.1:${apiPort}`
+}
+
 // Set API port (called from Electron preload)
 export function setApiPort(port: number): void {
   apiPort = port

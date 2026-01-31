@@ -12,7 +12,7 @@ import {
   Pause
 } from 'lucide-react'
 import { Button, Card, Input, Modal } from '../components'
-import { api, type SynthesizeResult } from '../lib/api'
+import { api, type SynthesizeResult, getServerBase } from '../lib/api'
 
 export function Test() {
   const navigate = useNavigate()
@@ -62,14 +62,21 @@ export function Test() {
       if (result.success && result.audio_path) {
         // Fetch the audio file and create a blob URL
         try {
-          const response = await fetch(`http://127.0.0.1:8765/output/synthesized.wav`)
+          const audioFileName = result.audio_path.split('/').pop() || 'synthesized.wav'
+          
+          // Use the API helper to get the base URL (it handles port automatically)
+          const serverBase = getServerBase()
+          const response = await fetch(`${serverBase}/api/voice/audio/${audioFileName}`)
+          
           if (response.ok) {
             const blob = await response.blob()
             const url = URL.createObjectURL(blob)
             setAudioUrl(url)
+          } else {
+            console.error(`Failed to fetch audio: ${response.status} ${response.statusText}`)
           }
         } catch (e) {
-          console.log('Could not fetch audio file directly')
+          console.error('Could not fetch audio file:', e)
         }
       }
     } catch (error) {

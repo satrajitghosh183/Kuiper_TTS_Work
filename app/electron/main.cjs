@@ -20,14 +20,25 @@ async function findAvailablePort(startPort) {
       const port = server.address().port
       server.close(() => resolve(port))
     })
-    server.on('error', () => {
-      resolve(findAvailablePort(startPort + 1))
+    server.on('error', (err) => {
+      if (err.code === 'EADDRINUSE') {
+        // Port is in use, try next one
+        server.close(() => {
+          resolve(findAvailablePort(startPort + 1))
+        })
+      } else {
+        // Other error, try next port anyway
+        server.close(() => {
+          resolve(findAvailablePort(startPort + 1))
+        })
+      }
     })
   })
 }
 
 // Start the Python backend
 async function startPythonBackend() {
+  // Find an available port, starting from 8765
   apiPort = await findAvailablePort(8765)
   
   const pythonPath = isDev 
@@ -71,6 +82,9 @@ async function startPythonBackend() {
 
   pythonProcess.on('close', (code) => {
     console.log(`Python backend exited with code ${code}`)
+    if (code !== 0) {
+      console.error(`Backend process exited with error code ${code}`)
+    }
     pythonProcess = null
   })
 

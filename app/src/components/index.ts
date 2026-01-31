@@ -8,4 +8,5 @@ export { Slider } from './Slider'
 export { Waveform } from './Waveform'
 export { StatusBadge } from './StatusBadge'
 export { Layout } from './Layout'
+export { ErrorBoundary } from './ErrorBoundary'
 

@@ -9,6 +9,29 @@ from dataclasses import dataclass, field
 from typing import Optional, Dict, List, Tuple
 from pathlib import Path
 
+# Flag to track if torch import is safe
+_torch_import_safe = None
+
+def _can_import_torch() -> bool:
+    """Check if torch can be safely imported without permission errors."""
+    global _torch_import_safe
+    if _torch_import_safe is not None:
+        return _torch_import_safe
+    
+    try:
+        import torch
+        _torch_import_safe = True
+        return True
+    except (PermissionError, OSError):
+        _torch_import_safe = False
+        return False
+    except ImportError:
+        _torch_import_safe = False
+        return False
+    except Exception:
+        _torch_import_safe = False
+        return False
+
 
 @dataclass
 class GPUInfo:
@@ -146,15 +169,70 @@ class SystemAnalyzer:
         Returns:
             SystemReport with all hardware and compatibility information
         """
-        gpu = self._check_gpu()
-        cpu = self._check_cpu()
-        memory = self._check_memory()
-        storage = self._check_storage(data_path or Path.cwd())
+        warnings = []
+        errors = []
+        
+        # Try to get GPU info with error handling
+        try:
+            gpu = self._check_gpu()
+        except (PermissionError, OSError) as e:
+            gpu = None
+            warnings.append(f"Could not detect GPU: {e}")
+        
+        # Get CPU info
+        try:
+            cpu = self._check_cpu()
+        except Exception as e:
+            cpu = CPUInfo(
+                name="Unknown",
+                cores_physical=1,
+                cores_logical=1,
+                frequency_mhz=0.0,
+                architecture=platform.machine()
+            )
+            warnings.append(f"Could not detect CPU details: {e}")
+        
+        # Get memory info
+        try:
+            memory = self._check_memory()
+        except Exception as e:
+            memory = MemoryInfo(
+                total_gb=8.0,
+                available_gb=4.0,
+                used_gb=4.0,
+                percent_used=50.0
+            )
+            warnings.append(f"Could not detect memory: {e}")
+        
+        # Get storage info
+        try:
+            storage = self._check_storage(data_path or Path.cwd())
+        except Exception as e:
+            storage = StorageInfo(
+                path=str(data_path or Path.cwd()),
+                total_gb=100.0,
+                free_gb=50.0,
+                percent_used=50.0
+            )
+            warnings.append(f"Could not detect storage: {e}")
         
         python_version = platform.python_version()
-        cuda_available = self._check_cuda()
-        mps_available = self._check_mps()
-        rocm_available = self._check_rocm()
+        
+        # Check backends with error handling
+        try:
+            cuda_available = self._check_cuda()
+        except Exception:
+            cuda_available = False
+        
+        try:
+            mps_available = self._check_mps()
+        except Exception:
+            mps_available = False
+        
+        try:
+            rocm_available = self._check_rocm()
+        except Exception:
+            rocm_available = False
         
         # Determine training backend
         if cuda_available and gpu and gpu.vendor == "nvidia":
@@ -167,12 +245,25 @@ class SystemAnalyzer:
             training_backend = "cpu"
         
         # Check compatibility
-        can_train, warnings, errors = self._check_compatibility(
+        can_train, compat_warnings, compat_errors = self._check_compatibility(
             gpu, memory, storage, training_backend
         )
+        warnings.extend(compat_warnings)
+        errors.extend(compat_errors)
         
         # Calculate estimates
-        estimates = self._calculate_estimates(gpu, training_backend)
+        try:
+            estimates = self._calculate_estimates(gpu, training_backend)
+        except Exception as e:
+            estimates = TrainingEstimate(
+                samples_100="~30m",
+                samples_500="~2h 30m",
+                samples_1000="~5h",
+                recommended_batch_size=16,
+                recommended_epochs=2000,
+                memory_per_batch_mb=512.0
+            )
+            warnings.append(f"Could not calculate precise estimates: {e}")
         
         return SystemReport(
             gpu=gpu,
@@ -359,12 +450,13 @@ class SystemAnalyzer:
             pass
         
         # Try PyTorch
-        try:
-            import torch
-            if torch.cuda.is_available():
-                return torch.version.cuda
-        except ImportError:
-            pass
+        if _can_import_torch():
+            try:
+                import torch
+                if torch.cuda.is_available():
+                    return torch.version.cuda
+            except Exception:
+                pass
         
         return None
     
@@ -481,41 +573,48 @@ class SystemAnalyzer:
     
     def _check_cuda(self) -> bool:
         """Check if CUDA is available."""
-        try:
-            import torch
-            return torch.cuda.is_available()
-        except (ImportError, Exception):
-            # Check for nvidia-smi as fallback
-            return shutil.which("nvidia-smi") is not None
+        if _can_import_torch():
+            try:
+                import torch
+                return torch.cuda.is_available()
+            except Exception:
+                pass
+        # Check for nvidia-smi as fallback
+        return shutil.which("nvidia-smi") is not None
     
     def _check_mps(self) -> bool:
         """Check if Apple Metal (MPS) is available."""
         if platform.system() != "Darwin":
             return False
         
-        try:
-            import torch
-            return torch.backends.mps.is_available()
-        except (ImportError, AttributeError, Exception):
-            # Check if running on Apple Silicon
+        if _can_import_torch():
             try:
-                result = subprocess.run(
-                    ["sysctl", "-n", "machdep.cpu.brand_string"],
-                    capture_output=True,
-                    text=True,
-                    timeout=5
-                )
-                return "Apple" in result.stdout
+                import torch
+                return torch.backends.mps.is_available()
             except Exception:
-                return False
+                pass
+        
+        # Check if running on Apple Silicon (fallback)
+        try:
+            result = subprocess.run(
+                ["sysctl", "-n", "machdep.cpu.brand_string"],
+                capture_output=True,
+                text=True,
+                timeout=5
+            )
+            return "Apple" in result.stdout
+        except Exception:
+            return False
     
     def _check_rocm(self) -> bool:
         """Check if AMD ROCm is available."""
-        try:
-            import torch
-            return torch.cuda.is_available() and "rocm" in torch.__version__.lower()
-        except ImportError:
-            return shutil.which("rocm-smi") is not None
+        if _can_import_torch():
+            try:
+                import torch
+                return torch.cuda.is_available() and "rocm" in torch.__version__.lower()
+            except Exception:
+                pass
+        return shutil.which("rocm-smi") is not None
     
     def _check_compatibility(
         self,

@@ -22,6 +22,12 @@ export function Welcome() {
   const navigate = useNavigate()
   const { systemCheck, isChecking, refetch, error: systemError } = useSystemInfo()
   const [serverAvailable, setServerAvailable] = useState<boolean | null>(null)
+  const [checkTimeout, setCheckTimeout] = useState(false)
+  
+  // Debug logging
+  useEffect(() => {
+    console.log('Welcome page mounted, serverAvailable:', serverAvailable)
+  }, [serverAvailable])
   const [estimates, setEstimates] = useState<{
     time100: string
     time500: string
@@ -30,13 +36,38 @@ export function Welcome() {
     epochs: number
   } | null>(null)
 
-  // Check server availability
+  // Check server availability with timeout
   useEffect(() => {
+    let mounted = true
+    
     const checkServer = async () => {
-      const available = await api.isServerAvailable()
-      setServerAvailable(available)
+      try {
+        // Add timeout to prevent hanging
+        const timeoutPromise = new Promise<boolean>((resolve) => {
+          setTimeout(() => {
+            if (mounted) resolve(false)
+          }, 3000) // 3 second timeout
+        })
+        
+        const checkPromise = api.isServerAvailable().catch(() => false)
+        const available = await Promise.race([checkPromise, timeoutPromise])
+        
+        if (mounted) {
+          setServerAvailable(available)
+        }
+      } catch (error) {
+        console.error('Server check failed:', error)
+        if (mounted) {
+          setServerAvailable(false)
+        }
+      }
     }
+    
     checkServer()
+    
+    return () => {
+      mounted = false
+    }
   }, [])
 
   useEffect(() => {
@@ -126,8 +157,20 @@ export function Welcome() {
     )
   }
 
+  // Timeout fallback for server check
+  useEffect(() => {
+    if (serverAvailable === null && !checkTimeout) {
+      const timer = setTimeout(() => {
+        console.warn('Server check timed out, showing content anyway')
+        setCheckTimeout(true)
+        setServerAvailable(false)
+      }, 3000)
+      return () => clearTimeout(timer)
+    }
+  }, [serverAvailable, checkTimeout])
+
   // Loading server check
-  if (serverAvailable === null) {
+  if (serverAvailable === null && !checkTimeout) {
     return (
       <motion.div
         className="max-w-4xl mx-auto flex flex-col items-center justify-center min-h-[60vh]"
