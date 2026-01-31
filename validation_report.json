@@ -1,0 +1,196 @@
+{
+  "meta": {
+    "pdf_path": "/Users/satrajitghosh/Projects/Machine_Learning_Projects/PDF_to_Latex/Friis Teaches an Introduction_to_radio_and_radio_antennas April 1971.pdf",
+    "latex_path": "/Users/satrajitghosh/Projects/Machine_Learning_Projects/PDF_to_Latex/friis_radio_antennas.tex",
+    "validation_time": "2026-01-19 22:27:14"
+  },
+  "pdf": {
+    "pages": 7,
+    "words": 3752,
+    "characters": 19238
+  },
+  "latex": {
+    "lines_of_code": 596,
+    "words_extracted": 2723,
+    "characters_extracted": 12935
+  },
+  "coverage": {
+    "word_coverage_pct": 72.6,
+    "char_coverage_pct": 67.2,
+    "missing_words": 1029,
+    "missing_characters": 6303
+  },
+  "equation_statistics": {
+    "pdf_estimated": 123,
+    "pdf_numbered": 23,
+    "latex_inline": 160,
+    "latex_display": 11,
+    "latex_environments": 46,
+    "latex_total": 217,
+    "difference": -94
+  },
+  "table_statistics": {
+    "pdf_detected": 0,
+    "pdf_references": [],
+    "latex_tables": 2,
+    "latex_tabular": 2,
+    "difference": -2,
+    "missing": []
+  },
+  "figure_statistics": {
+    "pdf_detected": 18,
+    "pdf_references": [
+      "Figure 1",
+      "Figure 2",
+      "Figure 4",
+      "Figure 7",
+      "Figure 3",
+      "Figure 5",
+      "Figure 6",
+      "Figure 8",
+      "Figure 9",
+      "Figure 10",
+      "Figure 11",
+      "Figure 12",
+      "Figure 13",
+      "Figure 14",
+      "Figure 15",
+      "Figure 16",
+      "Figure 17",
+      "Figure 18"
+    ],
+    "latex_figures": 17,
+    "latex_includegraphics": 17,
+    "difference": 1,
+    "missing": [
+      "Figure 2",
+      "Figure 3",
+      "Figure 5",
+      "Figure 6",
+      "Figure 8",
+      "Figure 10",
+      "Figure 11",
+      "Figure 12",
+      "Figure 14",
+      "Figure 17",
+      "Figure 18"
+    ]
+  },
+  "section_statistics": {
+    "pdf_estimated": 5,
+    "pdf_titles": [
+      "1893. He received the electrical engineer and doct",
+      "FIGURE",
+      "C\nD\nE\nE",
+      "R\nA\nR\nE",
+      "REFERENCE"
+    ],
+    "latex_sections": 13,
+    "latex_subsections": 1,
+    "latex_total": 14,
+    "difference": -9,
+    "missing": []
+  },
+  "latex_syntax": {
+    "valid": true,
+    "braces_balanced": true,
+    "environments_balanced": true,
+    "unbalanced": [],
+    "packages": [
+      "amsmath",
+      "amssymb",
+      "graphicx",
+      "hyperref",
+      "geometry",
+      "booktabs",
+      "longtable",
+      "xcolor",
+      "float"
+    ],
+    "issues": []
+  },
+  "vocabulary": {
+    "pdf_unique": 878,
+    "latex_unique": 664,
+    "shared": 643,
+    "overlap_pct": 71.5,
+    "missing_key_terms": [
+      "ieee",
+      "limited",
+      "cos",
+      "sin",
+      "licensed",
+      "authorized"
+    ],
+    "numbers_matched_pct": 52.2
+  },
+  "page_summary": [
+    {
+      "page": 1,
+      "pdf_words": 528,
+      "latex_words": 426,
+      "coverage_pct": 80.7,
+      "similarity_pct": 20.4,
+      "status": "OK"
+    },
+    {
+      "page": 2,
+      "pdf_words": 424,
+      "latex_words": 306,
+      "coverage_pct": 72.2,
+      "similarity_pct": 25.9,
+      "status": "PARTIAL"
+    },
+    {
+      "page": 3,
+      "pdf_words": 347,
+      "latex_words": 275,
+      "coverage_pct": 79.3,
+      "similarity_pct": 3.7,
+      "status": "PARTIAL"
+    },
+    {
+      "page": 4,
+      "pdf_words": 592,
+      "latex_words": 535,
+      "coverage_pct": 90.4,
+      "similarity_pct": 14.8,
+      "status": "OK"
+    },
+    {
+      "page": 5,
+      "pdf_words": 638,
+      "latex_words": 405,
+      "coverage_pct": 63.5,
+      "similarity_pct": 2.0,
+      "status": "PARTIAL"
+    },
+    {
+      "page": 6,
+      "pdf_words": 474,
+      "latex_words": 358,
+      "coverage_pct": 75.5,
+      "similarity_pct": 18.3,
+      "status": "PARTIAL"
+    },
+    {
+      "page": 7,
+      "pdf_words": 749,
+      "latex_words": 418,
+      "coverage_pct": 55.8,
+      "similarity_pct": 31.0,
+      "status": "LOW_COVERAGE"
+    }
+  ],
+  "issues": {
+    "pages_with_issues": [
+      7
+    ],
+    "critical": [],
+    "warnings": [
+      "Missing figures: Figure 2, Figure 3, Figure 5, Figure 6, Figure 8",
+      "Missing key terms: ieee, limited, cos, sin, licensed",
+      "Low number preservation: 52%"
+    ]
+  }
+}

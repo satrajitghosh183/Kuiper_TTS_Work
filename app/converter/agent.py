@@ -38,6 +38,7 @@ from app.exceptions import (
 from app.models import PageContent
 from app.ocr.hf_client import HuggingFaceOCRClient
 from app.ocr.local_client import LocalHuggingFaceOCR
+from app.ocr.ollama_client import OllamaOCRClient
 from app.ocr.prompts import get_page_conversion_prompt
 
 logger = structlog.get_logger()
@@ -86,7 +87,29 @@ class PDFToLaTeXAgent:
 
     def _init_clients(self) -> None:
         """Initialize API clients based on configuration."""
-        if self.config.primary_provider == "huggingface":
+        provider = self.config.primary_provider.lower()
+        
+        if provider == "ollama":
+            # Ollama: completely local, no API needed
+            try:
+                self._ocr_client = OllamaOCRClient(
+                    model=self.config.ollama_model,
+                    host=self.config.ollama_host,
+                    timeout=self.config.request_timeout,
+                    max_retries=self.config.max_retries,
+                    num_ctx=self.config.ollama_num_ctx,
+                )
+                logger.info(
+                    "Using Ollama for local inference",
+                    model=self.config.ollama_model,
+                )
+            except Exception as e:
+                logger.warning(
+                    "Failed to initialize Ollama client",
+                    error=str(e),
+                )
+                
+        elif provider == "huggingface":
             if self.config.hf_use_inference_api:
                 try:
                     self._ocr_client = HuggingFaceOCRClient(

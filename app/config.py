@@ -28,6 +28,7 @@ class Provider(str, Enum):
     """Supported AI providers."""
 
     HUGGINGFACE = "huggingface"
+    OLLAMA = "ollama"
     OPENAI = "openai"
     GOOGLE = "google"
 
@@ -74,7 +75,7 @@ class ConversionConfig:
     preserve_formatting: bool = True
 
     # API Configuration
-    primary_provider: str = "huggingface"  # huggingface, openai, google
+    primary_provider: str = "huggingface"  # huggingface, ollama, openai, google
     fallback_provider: str = "google"
 
     # Hugging Face specific
@@ -82,15 +83,25 @@ class ConversionConfig:
     hf_use_inference_api: bool = True  # Use HF Inference API vs local
     hf_api_token: Optional[str] = None  # Set via HF_TOKEN env var
 
+    # Ollama specific (completely local, no API needed)
+    ollama_model: str = "llava:13b"  # Default Ollama vision model
+    ollama_host: str = "http://localhost:11434"  # Ollama server URL
+    ollama_num_ctx: int = 8192  # Context window size
+
     # Timeouts and retries
     request_timeout: int = 120
     max_retries: int = 3
     retry_delay: int = 5
 
     def __post_init__(self):
-        """Load API token from environment if not provided."""
+        """Load API token and Ollama host from environment if not provided."""
         if self.hf_api_token is None:
             self.hf_api_token = os.environ.get("HF_TOKEN")
+        
+        # Allow overriding Ollama host via environment
+        env_ollama_host = os.environ.get("OLLAMA_HOST")
+        if env_ollama_host:
+            self.ollama_host = env_ollama_host
 
 
 class Settings(BaseSettings):
@@ -122,6 +133,16 @@ class Settings(BaseSettings):
     # Fallback providers
     OPENAI_API_KEY: str = Field(default="", description="OpenAI API key (fallback)")
     GOOGLE_API_KEY: str = Field(default="", description="Google API key (fallback)")
+
+    # Ollama Configuration (local, no API needed)
+    OLLAMA_HOST: str = Field(
+        default="http://localhost:11434",
+        description="Ollama server URL",
+    )
+    OLLAMA_MODEL: str = Field(
+        default="llava:13b",
+        description="Default Ollama vision model",
+    )
 
     # Redis/Celery Configuration
     REDIS_URL: str = Field(default="redis://localhost:6379", description="Redis URL")
@@ -193,5 +214,16 @@ RECOMMENDED_MODELS = {
     "tables": "microsoft/table-transformer-detection",
     "formatted": "stepfun-ai/GOT-OCR2_0",
     "fast": "reducto/RolmOCR",
+}
+
+# Recommended Ollama models (local, no API needed)
+OLLAMA_MODELS = {
+    "general": "llava:13b",          # Good balance of quality and speed
+    "fast": "llava:7b",              # Faster, lighter model
+    "quality": "llava:34b",          # Highest quality, needs more VRAM
+    "bakllava": "bakllava",          # BakLLaVA - good for documents
+    "llava-llama3": "llava-llama3",  # LLaVA with Llama 3 base
+    "minicpm-v": "minicpm-v",        # MiniCPM-V - efficient vision model
+    "moondream": "moondream",        # Lightweight vision model
 }
 

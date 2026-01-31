@@ -1,0 +1,594 @@
+{
+  "timestamp": "2026-01-27T14:57:02.552614",
+  "model_id": "Qwen/Qwen2.5-VL-7B-Instruct",
+  "provider": "huggingface",
+  "summary": {
+    "total_papers": 5,
+    "successful_papers": 3,
+    "failed_papers": 2,
+    "total_pages_processed": 49,
+    "total_time_seconds": 1269.7144176959991,
+    "total_characters": 156174,
+    "overall_avg_time_per_page": 25.912539136653045,
+    "overall_avg_chars_per_page": 3187.2244897959185
+  },
+  "papers": [
+    {
+      "name": "Friis - Introduction to Radio and Antennas",
+      "path": "/Users/satrajitghosh/Projects/Machine_Learning_Projects/PDF_to_Latex/Friis Teaches an Introduction_to_radio_and_radio_antennas April 1971.pdf",
+      "paper_type": "local",
+      "description": "Classic paper on radio fundamentals by Harald T. Friis (1971)",
+      "total_time_seconds": 156.58942484855652,
+      "download_time_seconds": 0.0013780593872070312,
+      "total_pages": 7,
+      "page_stats": [
+        {
+          "page_number": 1,
+          "processing_time_seconds": 9.884074926376343,
+          "character_count": 3408,
+          "word_count": 562,
+          "has_equations": true,
+          "has_tables": false,
+          "has_figures": true
+        },
+        {
+          "page_number": 2,
+          "processing_time_seconds": 13.82308578491211,
+          "character_count": 3202,
+          "word_count": 426,
+          "has_equations": true,
+          "has_tables": false,
+          "has_figures": true
+        },
+        {
+          "page_number": 3,
+          "processing_time_seconds": 23.34776496887207,
+          "character_count": 3594,
+          "word_count": 474,
+          "has_equations": true,
+          "has_tables": false,
+          "has_figures": true
+        },
+        {
+          "page_number": 4,
+          "processing_time_seconds": 37.308587074279785,
+          "character_count": 4257,
+          "word_count": 628,
+          "has_equations": true,
+          "has_tables": false,
+          "has_figures": true
+        },
+        {
+          "page_number": 5,
+          "processing_time_seconds": 30.17571997642517,
+          "character_count": 5161,
+          "word_count": 775,
+          "has_equations": true,
+          "has_tables": true,
+          "has_figures": true
+        },
+        {
+          "page_number": 6,
+          "processing_time_seconds": 26.21860694885254,
+          "character_count": 3425,
+          "word_count": 432,
+          "has_equations": true,
+          "has_tables": false,
+          "has_figures": true
+        },
+        {
+          "page_number": 7,
+          "processing_time_seconds": 15.415969133377075,
+          "character_count": 2877,
+          "word_count": 442,
+          "has_equations": false,
+          "has_tables": false,
+          "has_figures": false
+        }
+      ],
+      "total_characters": 25924,
+      "total_words": 3739,
+      "output_path": "benchmark_output/Friis - Introduction to Radio and Antennas.tex",
+      "latex_size_bytes": 26486,
+      "success": true,
+      "error_message": "",
+      "avg_time_per_page": 22.310544116156443,
+      "avg_chars_per_page": 3703.4285714285716,
+      "avg_words_per_page": 534.1428571428571
+    },
+    {
+      "name": "LoRA - Low-Rank Adaptation",
+      "path": "https://arxiv.org/pdf/2106.09685.pdf",
+      "paper_type": "arxiv",
+      "description": "LoRA: Low-Rank Adaptation of Large Language Models (2021)",
+      "total_time_seconds": 307.85548877716064,
+      "download_time_seconds": 0.2758617401123047,
+      "total_pages": 26,
+      "page_stats": [
+        {
+          "page_number": 1,
+          "processing_time_seconds": 15.526463985443115,
+          "character_count": 3221,
+          "word_count": 442,
+          "has_equations": true,
+          "has_tables": false,
+          "has_figures": true
+        },
+        {
+          "page_number": 2,
+          "processing_time_seconds": 4.416254997253418,
+          "character_count": 1130,
+          "word_count": 162,
+          "has_equations": true,
+          "has_tables": false,
+          "has_figures": false
+        },
+        {
+          "page_number": 3,
+          "processing_time_seconds": 19.842080116271973,
+          "character_count": 2931,
+          "word_count": 464,
+          "has_equations": true,
+          "has_tables": false,
+          "has_figures": false
+        },
+        {
+          "page_number": 4,
+          "processing_time_seconds": 24.64500904083252,
+          "character_count": 4477,
+          "word_count": 735,
+          "has_equations": true,
+          "has_tables": true,
+          "has_figures": false
+        },
+        {
+          "page_number": 5,
+          "processing_time_seconds": 10.766260862350464,
+          "character_count": 4296,
+          "word_count": 690,
+          "has_equations": true,
+          "has_tables": false,
+          "has_figures": false
+        },
+        {
+          "page_number": 6,
+          "processing_time_seconds": 23.34786081314087,
+          "character_count": 6197,
+          "word_count": 1054,
+          "has_equations": true,
+          "has_tables": true,
+          "has_figures": false
+        },
+        {
+          "page_number": 7,
+          "processing_time_seconds": 20.377365112304688,
+          "character_count": 3975,
+          "word_count": 675,
+          "has_equations": true,
+          "has_tables": true,
+          "has_figures": false
+        },
+        {
+          "page_number": 8,
+          "processing_time_seconds": 6.32311487197876,
+          "character_count": 1962,
+          "word_count": 286,
+          "has_equations": false,
+          "has_tables": false,
+          "has_figures": true
+        },
+        {
+          "page_number": 9,
+          "processing_time_seconds": 9.772396087646484,
+          "character_count": 4503,
+          "word_count": 603,
+          "has_equations": true,
+          "has_tables": false,
+          "has_figures": false
+        },
+        {
+          "page_number": 10,
+          "processing_time_seconds": 13.602034091949463,
+          "character_count": 3813,
+          "word_count": 744,
+          "has_equations": false,
+          "has_tables": true,
+          "has_figures": false
+        },
+        {
+          "page_number": 11,
+          "processing_time_seconds": 10.137365102767944,
+          "character_count": 3641,
+          "word_count": 601,
+          "has_equations": true,
+          "has_tables": false,
+          "has_figures": true
+        },
+        {
+          "page_number": 12,
+          "processing_time_seconds": 3.836804151535034,
+          "character_count": 1037,
+          "word_count": 150,
+          "has_equations": false,
+          "has_tables": false,
+          "has_figures": false
+        },
+        {
+          "page_number": 13,
+          "processing_time_seconds": 15.620536088943481,
+          "character_count": 3764,
+          "word_count": 428,
+          "has_equations": false,
+          "has_tables": false,
+          "has_figures": false
+        },
+        {
+          "page_number": 14,
+          "processing_time_seconds": 12.616395950317383,
+          "character_count": 3851,
+          "word_count": 424,
+          "has_equations": false,
+          "has_tables": false,
+          "has_figures": false
+        },
+        {
+          "page_number": 15,
+          "processing_time_seconds": 14.034856796264648,
+          "character_count": 3807,
+          "word_count": 462,
+          "has_equations": false,
+          "has_tables": false,
+          "has_figures": false
+        },
+        {
+          "page_number": 16,
+          "processing_time_seconds": 8.06005573272705,
+          "character_count": 617,
+          "word_count": 93,
+          "has_equations": false,
+          "has_tables": false,
+          "has_figures": false
+        },
+        {
+          "page_number": 17,
+          "processing_time_seconds": 11.534878015518188,
+          "character_count": 2294,
+          "word_count": 322,
+          "has_equations": true,
+          "has_tables": false,
+          "has_figures": true
+        },
+        {
+          "page_number": 18,
+          "processing_time_seconds": 5.055625915527344,
+          "character_count": 1612,
+          "word_count": 272,
+          "has_equations": true,
+          "has_tables": false,
+          "has_figures": false
+        },
+        {
+          "page_number": 19,
+          "processing_time_seconds": 15.986983060836792,
+          "character_count": 3514,
+          "word_count": 695,
+          "has_equations": true,
+          "has_tables": true,
+          "has_figures": false
+        },
+        {
+          "page_number": 20,
+          "processing_time_seconds": 3.2596521377563477,
+          "character_count": 663,
+          "word_count": 92,
+          "has_equations": false,
+          "has_tables": false,
+          "has_figures": false
+        },
+        {
+          "page_number": 21,
+          "processing_time_seconds": 10.902093172073364,
+          "character_count": 2092,
+          "word_count": 355,
+          "has_equations": true,
+          "has_tables": true,
+          "has_figures": false
+        },
+        {
+          "page_number": 22,
+          "processing_time_seconds": 5.82251501083374,
+          "character_count": 2029,
+          "word_count": 296,
+          "has_equations": true,
+          "has_tables": false,
+          "has_figures": false
+        },
+        {
+          "page_number": 23,
+          "processing_time_seconds": 14.059431791305542,
+          "character_count": 3043,
+          "word_count": 671,
+          "has_equations": true,
+          "has_tables": true,
+          "has_figures": false
+        },
+        {
+          "page_number": 24,
+          "processing_time_seconds": 8.347013235092163,
+          "character_count": 2368,
+          "word_count": 443,
+          "has_equations": false,
+          "has_tables": true,
+          "has_figures": false
+        },
+        {
+          "page_number": 25,
+          "processing_time_seconds": 5.006328105926514,
+          "character_count": 1503,
+          "word_count": 231,
+          "has_equations": true,
+          "has_tables": false,
+          "has_figures": false
+        },
+        {
+          "page_number": 26,
+          "processing_time_seconds": 14.437613248825073,
+          "character_count": 2102,
+          "word_count": 363,
+          "has_equations": true,
+          "has_tables": true,
+          "has_figures": true
+        }
+      ],
+      "total_characters": 74442,
+      "total_words": 11753,
+      "output_path": "benchmark_output/LoRA - Low-Rank Adaptation.tex",
+      "latex_size_bytes": 75534,
+      "success": true,
+      "error_message": "",
+      "avg_time_per_page": 11.820653365208553,
+      "avg_chars_per_page": 2863.153846153846,
+      "avg_words_per_page": 452.03846153846155
+    },
+    {
+      "name": "Attention Is All You Need",
+      "path": "https://arxiv.org/pdf/1706.03762.pdf",
+      "paper_type": "arxiv",
+      "description": "The original Transformer paper by Vaswani et al. (2017)",
+      "total_time_seconds": 53.051604986190796,
+      "download_time_seconds": 0.32604002952575684,
+      "total_pages": 15,
+      "page_stats": [
+        {
+          "page_number": 1,
+          "processing_time_seconds": 18.895860195159912,
+          "character_count": 3022,
+          "word_count": 398,
+          "has_equations": true,
+          "has_tables": false,
+          "has_figures": false
+        },
+        {
+          "page_number": 2,
+          "processing_time_seconds": 20.385164976119995,
+          "character_count": 4888,
+          "word_count": 615,
+          "has_equations": true,
+          "has_tables": false,
+          "has_figures": false
+        },
+        {
+          "page_number": 3,
+          "processing_time_seconds": 6.406010866165161,
+          "character_count": 1693,
+          "word_count": 261,
+          "has_equations": false,
+          "has_tables": false,
+          "has_figures": false
+        }
+      ],
+      "total_characters": 9603,
+      "total_words": 1274,
+      "output_path": "",
+      "latex_size_bytes": 0,
+      "success": false,
+      "error_message": "Failed to process page 4: OCR failed after 3 attempts: 402 Client Error: Payment Required for url: https://router.huggingface.co/hyperbolic/v1/chat/completions (Request ID: Root=1-69791a94-0f75a6fd66b190a9120018b5;6dd11061-a208-47ca-96ca-85682cb18246)\n\nCredit balance is depleted: purchase pre-paid credits to continue using Inference Providers with your account. Alternatively, subscribe to PRO to get 20x more included usage. - Details: {'model_id': 'Qwen/Qwen2.5-VL-7B-Instruct', 'last_error': '402 Client Error: Payment Required for url: https://router.huggingface.co/hyperbolic/v1/chat/completions (Request ID: Root=1-69791a94-0f75a6fd66b190a9120018b5;6dd11061-a208-47ca-96ca-85682cb18246)\\n\\nCredit balance is depleted: purchase pre-paid credits to continue using Inference Providers with your account. Alternatively, subscribe to PRO to get 20x more included usage.'}",
+      "avg_time_per_page": 15.22901201248169,
+      "avg_chars_per_page": 3201.0,
+      "avg_words_per_page": 424.6666666666667
+    },
+    {
+      "name": "BERT",
+      "path": "https://arxiv.org/pdf/1810.04805.pdf",
+      "paper_type": "arxiv",
+      "description": "BERT: Pre-training of Deep Bidirectional Transformers (2018)",
+      "total_time_seconds": 805.269504070282,
+      "download_time_seconds": 0.20827579498291016,
+      "total_pages": 16,
+      "page_stats": [
+        {
+          "page_number": 1,
+          "processing_time_seconds": 5.705730199813843,
+          "character_count": 1964,
+          "word_count": 241,
+          "has_equations": false,
+          "has_tables": false,
+          "has_figures": false
+        },
+        {
+          "page_number": 2,
+          "processing_time_seconds": 6.827436685562134,
+          "character_count": 1664,
+          "word_count": 191,
+          "has_equations": false,
+          "has_tables": false,
+          "has_figures": false
+        },
+        {
+          "page_number": 3,
+          "processing_time_seconds": 9.15814208984375,
+          "character_count": 3713,
+          "word_count": 466,
+          "has_equations": false,
+          "has_tables": false,
+          "has_figures": true
+        },
+        {
+          "page_number": 4,
+          "processing_time_seconds": 52.579071283340454,
+          "character_count": 4815,
+          "word_count": 742,
+          "has_equations": true,
+          "has_tables": false,
+          "has_figures": false
+        },
+        {
+          "page_number": 5,
+          "processing_time_seconds": 16.407816886901855,
+          "character_count": 1061,
+          "word_count": 158,
+          "has_equations": false,
+          "has_tables": false,
+          "has_figures": false
+        },
+        {
+          "page_number": 6,
+          "processing_time_seconds": 602.8778171539307,
+          "character_count": 5476,
+          "word_count": 852,
+          "has_equations": true,
+          "has_tables": true,
+          "has_figures": false
+        },
+        {
+          "page_number": 7,
+          "processing_time_seconds": 12.975844860076904,
+          "character_count": 3778,
+          "word_count": 638,
+          "has_equations": true,
+          "has_tables": true,
+          "has_figures": false
+        },
+        {
+          "page_number": 8,
+          "processing_time_seconds": 10.424163818359375,
+          "character_count": 3951,
+          "word_count": 608,
+          "has_equations": false,
+          "has_tables": false,
+          "has_figures": false
+        },
+        {
+          "page_number": 9,
+          "processing_time_seconds": 12.597739934921265,
+          "character_count": 4749,
+          "word_count": 759,
+          "has_equations": false,
+          "has_tables": true,
+          "has_figures": false
+        },
+        {
+          "page_number": 10,
+          "processing_time_seconds": 13.34309697151184,
+          "character_count": 4804,
+          "word_count": 624,
+          "has_equations": false,
+          "has_tables": false,
+          "has_figures": false
+        },
+        {
+          "page_number": 11,
+          "processing_time_seconds": 20.830589056015015,
+          "character_count": 5232,
+          "word_count": 660,
+          "has_equations": false,
+          "has_tables": false,
+          "has_figures": false
+        },
+        {
+          "page_number": 12,
+          "processing_time_seconds": 5.322828054428101,
+          "character_count": 1633,
+          "word_count": 245,
+          "has_equations": true,
+          "has_tables": false,
+          "has_figures": false
+        },
+        {
+          "page_number": 13,
+          "processing_time_seconds": 7.40121865272522,
+          "character_count": 2543,
+          "word_count": 381,
+          "has_equations": true,
+          "has_tables": false,
+          "has_figures": false
+        },
+        {
+          "page_number": 14,
+          "processing_time_seconds": 9.74679183959961,
+          "character_count": 3946,
+          "word_count": 588,
+          "has_equations": false,
+          "has_tables": false,
+          "has_figures": false
+        },
+        {
+          "page_number": 15,
+          "processing_time_seconds": 7.816082000732422,
+          "character_count": 2851,
+          "word_count": 349,
+          "has_equations": false,
+          "has_tables": true,
+          "has_figures": true
+        },
+        {
+          "page_number": 16,
+          "processing_time_seconds": 10.895985841751099,
+          "character_count": 3628,
+          "word_count": 560,
+          "has_equations": false,
+          "has_tables": true,
+          "has_figures": true
+        }
+      ],
+      "total_characters": 55808,
+      "total_words": 8062,
+      "output_path": "benchmark_output/BERT.tex",
+      "latex_size_bytes": 56630,
+      "success": true,
+      "error_message": "",
+      "avg_time_per_page": 50.3068972080946,
+      "avg_chars_per_page": 3488.0,
+      "avg_words_per_page": 503.875
+    },
+    {
+      "name": "QLoRA - Efficient Finetuning",
+      "path": "https://arxiv.org/pdf/2305.14314.pdf",
+      "paper_type": "arxiv",
+      "description": "QLoRA: Efficient Finetuning of Quantized LLMs (2023)",
+      "total_time_seconds": 15.936540842056274,
+      "download_time_seconds": 0.385577917098999,
+      "total_pages": 26,
+      "page_stats": [
+        {
+          "page_number": 1,
+          "processing_time_seconds": 8.347541093826294,
+          "character_count": 3108,
+          "word_count": 432,
+          "has_equations": false,
+          "has_tables": false,
+          "has_figures": false
+        }
+      ],
+      "total_characters": 3108,
+      "total_words": 432,
+      "output_path": "",
+      "latex_size_bytes": 0,
+      "success": false,
+      "error_message": "Failed to process page 2: OCR failed after 3 attempts: 402 Client Error: Payment Required for url: https://router.huggingface.co/hyperbolic/v1/chat/completions (Request ID: Root=1-69791dc9-1e251bfa4dd70b1e199f786c;b5161dc6-0e80-4c21-b3a0-d54f9ce07654)\n\nCredit balance is depleted: purchase pre-paid credits to continue using Inference Providers with your account. Alternatively, subscribe to PRO to get 20x more included usage. - Details: {'model_id': 'Qwen/Qwen2.5-VL-7B-Instruct', 'last_error': '402 Client Error: Payment Required for url: https://router.huggingface.co/hyperbolic/v1/chat/completions (Request ID: Root=1-69791dc9-1e251bfa4dd70b1e199f786c;b5161dc6-0e80-4c21-b3a0-d54f9ce07654)\\n\\nCredit balance is depleted: purchase pre-paid credits to continue using Inference Providers with your account. Alternatively, subscribe to PRO to get 20x more included usage.'}",
+      "avg_time_per_page": 8.347541093826294,
+      "avg_chars_per_page": 3108.0,
+      "avg_words_per_page": 432.0
+    }
+  ]
+}

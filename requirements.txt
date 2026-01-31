@@ -7,6 +7,9 @@ PyMuPDF>=1.23.0
 requests>=2.31.0
 python-dotenv>=1.0.0
 
+# Ollama - Local inference (no API needed)
+ollama>=0.3.0
+
 # API Framework
 pydantic>=2.0.0
 pydantic-settings>=2.0.0
