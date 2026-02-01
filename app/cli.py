@@ -213,67 +213,6 @@ def batch(
 
 
 @app.command()
-def serve(
-    host: str = typer.Option("0.0.0.0", "--host", help="Host to bind"),
-    port: int = typer.Option(8000, "--port", help="Port to bind"),
-    reload: bool = typer.Option(False, "--reload", help="Enable auto-reload"),
-    workers: int = typer.Option(1, "-w", "--workers", help="Number of workers"),
-):
-    """
-    Start the API server.
-    
-    Example:
-        pdf-to-latex serve --port 8080 --reload
-    """
-    import uvicorn
-
-    console.print(f"[bold blue]Starting PDF-to-LaTeX API Server[/bold blue]")
-    console.print(f"Host: {host}:{port}")
-    console.print(f"Docs: http://{host}:{port}/docs")
-    console.print()
-
-    uvicorn.run(
-        "app.main:app",
-        host=host,
-        port=port,
-        reload=reload,
-        workers=workers if not reload else 1,
-        log_level="info",
-    )
-
-
-@app.command()
-def worker(
-    concurrency: int = typer.Option(2, "-c", "--concurrency", help="Worker concurrency"),
-    queues: str = typer.Option("celery", "-Q", "--queues", help="Queue names"),
-    loglevel: str = typer.Option("info", "-l", "--loglevel", help="Log level"),
-):
-    """
-    Start a Celery worker.
-    
-    Example:
-        pdf-to-latex worker -c 4 -l debug
-    """
-    import subprocess
-
-    console.print(f"[bold blue]Starting Celery Worker[/bold blue]")
-    console.print(f"Concurrency: {concurrency}")
-    console.print(f"Queues: {queues}")
-    console.print()
-
-    cmd = [
-        "celery",
-        "-A", "app.worker",
-        "worker",
-        f"--concurrency={concurrency}",
-        f"-Q", queues,
-        f"--loglevel={loglevel}",
-    ]
-
-    subprocess.run(cmd)
-
-
-@app.command()
 def info():
     """
     Show configuration and environment information.
@@ -323,7 +262,6 @@ def info():
     table.add_row("Use Inference API", str(settings.HF_USE_INFERENCE_API))
     table.add_row("Ollama Host", settings.OLLAMA_HOST)
     table.add_row("Ollama Model", settings.OLLAMA_MODEL)
-    table.add_row("Redis URL", settings.REDIS_URL)
     table.add_row("Upload Dir", settings.UPLOAD_DIR)
     table.add_row("Output Dir", settings.OUTPUT_DIR)
     table.add_row("DPI", str(settings.DPI))
@@ -726,8 +664,6 @@ def compare(
 
 
 def main():
-    """Entry point for CLI."""
-    app()
     """Entry point for CLI."""
     app()
 

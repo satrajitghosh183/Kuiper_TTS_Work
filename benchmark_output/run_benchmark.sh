@@ -16,7 +16,7 @@ set -e
 
 # Configuration
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-PROJECT_ROOT="${SCRIPT_DIR}"
+PROJECT_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
 OUTPUT_DIR="${SCRIPT_DIR}/benchmark_output"
 MODEL="Qwen/Qwen2.5-VL-7B-Instruct"
 

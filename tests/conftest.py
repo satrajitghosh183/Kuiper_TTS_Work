@@ -6,16 +6,13 @@ import os
 import tempfile
 from pathlib import Path
 from typing import Generator
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 
 import pytest
-from fastapi.testclient import TestClient
 from PIL import Image
 
 # Set test environment variables before importing app modules
 os.environ.setdefault("HF_TOKEN", "test_token")
-os.environ.setdefault("REDIS_URL", "redis://localhost:6379")
-os.environ.setdefault("API_KEY", "test_api_key")
 
 
 @pytest.fixture
@@ -70,28 +67,6 @@ E = mc^2
 This demonstrates the PDF to LaTeX conversion."""
     mock.is_available.return_value = True
     return mock
-
-
-@pytest.fixture
-def mock_redis():
-    """Create a mock Redis client."""
-    mock = MagicMock()
-    mock.hgetall.return_value = {
-        "status": "completed",
-        "progress": "100",
-        "result_path": "/app/outputs/test.tex",
-    }
-    mock.hset.return_value = True
-    mock.ping.return_value = True
-    return mock
-
-
-@pytest.fixture
-def test_client():
-    """Create a FastAPI test client."""
-    from app.main import app
-
-    return TestClient(app)
 
 
 @pytest.fixture

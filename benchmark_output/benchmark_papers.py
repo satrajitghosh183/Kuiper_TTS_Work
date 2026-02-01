@@ -29,7 +29,7 @@ from typing import List, Optional, Dict, Any
 import statistics
 
 # Add project root to path
-project_root = Path(__file__).resolve().parent
+project_root = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(project_root))
 
 # Load .env from project root (HF_TOKEN, etc.)
