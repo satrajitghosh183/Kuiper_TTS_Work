@@ -96,11 +96,15 @@ export function Waveform({
   }, [])
 
   return (
-    <div className={`bg-surface border border-border rounded-lg p-4 ${className}`}>
+    <div className={`bg-surface border border-border rounded-lg ${className}`} style={{ padding: 'clamp(8px, 1vw, 16px)' }}>
       <canvas
         ref={canvasRef}
-        className="w-full h-16"
-        style={{ width: '100%', height: '64px' }}
+        className="w-full"
+        style={{ 
+          width: '100%', 
+          height: 'clamp(32px, 6vw, 64px)',
+          minHeight: '32px'
+        }}
       />
     </div>
   )

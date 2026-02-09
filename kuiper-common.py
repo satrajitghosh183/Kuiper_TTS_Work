@@ -59,7 +59,7 @@ class KuiperConfig:
     config_path: Path = DEFAULT_CONFIG_PATH
     log_dir: Path = DEFAULT_LOG_DIR
     checkpoint_path: Optional[Path] = DEFAULT_CHECKPOINT_PATH
-    
+  
     # Microphone settings
     microphone_device_id: Optional[int] = None
     microphone_gain: float = 1.0

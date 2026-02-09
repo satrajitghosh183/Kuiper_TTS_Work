@@ -45,7 +45,7 @@ def main():
     # Validate setup
     is_valid, errors = kuiper.validate_setup()
     if not is_valid:
-        logger.error("❌ Setup validation failed:")
+        logger.error("Setup validation failed:")
         for error in errors:
             logger.error(f"   - {error}")
         sys.exit(1)

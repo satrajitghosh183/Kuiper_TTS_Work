@@ -180,6 +180,44 @@ export const api = {
     return fetchAPI('/recording/list')
   },
 
+  async downloadRecordings(): Promise<Blob> {
+    const response = await fetch(`${getApiBase()}/recording/download`, {
+      method: 'GET',
+    })
+    
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({ detail: 'Unknown error' }))
+      throw new APIError(
+        error.detail || `HTTP ${response.status}`,
+        response.status,
+        error.detail
+      )
+    }
+    
+    return response.blob()
+  },
+
+  async pronounceText(text: string, voice?: string): Promise<Blob> {
+    const response = await fetch(`${getApiBase()}/voice/pronounce`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ text, voice }),
+    })
+    
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({ detail: 'Unknown error' }))
+      throw new APIError(
+        error.detail || `HTTP ${response.status}`,
+        response.status,
+        error.detail
+      )
+    }
+    
+    return response.blob()
+  },
+
   async getRecordingProgress(): Promise<RecordingProgress[]> {
     return fetchAPI('/recording/progress')
   },

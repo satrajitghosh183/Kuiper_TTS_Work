@@ -64,10 +64,22 @@ interface UseAudioRecorderOptions {
   sampleRate?: number
   channelCount?: number
   onDataAvailable?: (blob: Blob) => void
+  autoSave?: boolean // Default false for draft mode
+  silenceThreshold?: number // RMS threshold (0-1)
+  silenceDurationMs?: number // Milliseconds of silence before auto-stop
+  maxDurationMs?: number // Maximum recording duration
 }
 
 export function useAudioRecorder(options: UseAudioRecorderOptions = {}) {
-  const { sampleRate = 22050, channelCount = 1, onDataAvailable } = options
+  const { 
+    sampleRate = 22050, 
+    channelCount = 1, 
+    onDataAvailable,
+    autoSave = false,
+    silenceThreshold = 0.01,
+    silenceDurationMs = 2000,
+    maxDurationMs = 30000,
+  } = options
 
   const [state, setState] = useState<AudioRecorderState>({
     isRecording: false,
@@ -85,6 +97,8 @@ export function useAudioRecorder(options: UseAudioRecorderOptions = {}) {
   const chunksRef = useRef<Blob[]>([])
   const startTimeRef = useRef<number>(0)
   const animationFrameRef = useRef<number>(0)
+  const silenceStartRef = useRef<number | null>(null)
+  const maxDurationTimeoutRef = useRef<NodeJS.Timeout | null>(null)
 
   // Cleanup on unmount
   useEffect(() => {
@@ -96,25 +110,50 @@ export function useAudioRecorder(options: UseAudioRecorderOptions = {}) {
     }
   }, [])
 
+  const stopRecordingRef = useRef<() => void>()
+
   const updateAudioLevel = useCallback(() => {
     if (!analyserRef.current || !state.isRecording) return
 
     const dataArray = new Uint8Array(analyserRef.current.frequencyBinCount)
     analyserRef.current.getByteFrequencyData(dataArray)
 
-    // Calculate average level
-    const sum = dataArray.reduce((a, b) => a + b, 0)
-    const average = sum / dataArray.length
-    const normalizedLevel = average / 255
+    // Calculate RMS for silence detection
+    const sum = dataArray.reduce((a, b) => a + b * b, 0)
+    const rms = Math.sqrt(sum / dataArray.length) / 255
+    const normalizedLevel = dataArray.reduce((a, b) => a + b, 0) / dataArray.length / 255
+
+    const currentDuration = (Date.now() - startTimeRef.current) / 1000
+
+    // Check for silence
+    if (silenceDurationMs > 0 && silenceThreshold > 0) {
+      if (rms < silenceThreshold) {
+        silenceStartRef.current = silenceStartRef.current || Date.now()
+        const silenceDuration = Date.now() - silenceStartRef.current
+        
+        if (silenceDuration > silenceDurationMs && stopRecordingRef.current) {
+          stopRecordingRef.current()
+          return
+        }
+      } else {
+        silenceStartRef.current = null
+      }
+    }
+
+    // Check max duration
+    if (maxDurationMs > 0 && currentDuration * 1000 >= maxDurationMs && stopRecordingRef.current) {
+      stopRecordingRef.current()
+      return
+    }
 
     setState((prev) => ({
       ...prev,
       audioLevel: normalizedLevel,
-      duration: (Date.now() - startTimeRef.current) / 1000,
+      duration: currentDuration,
     }))
 
     animationFrameRef.current = requestAnimationFrame(updateAudioLevel)
-  }, [state.isRecording])
+  }, [state.isRecording, silenceThreshold, silenceDurationMs, maxDurationMs])
 
   const startRecording = useCallback(
     async (deviceId?: string) => {
@@ -175,7 +214,17 @@ export function useAudioRecorder(options: UseAudioRecorderOptions = {}) {
 
         // Start recording
         startTimeRef.current = Date.now()
+        silenceStartRef.current = null
         mediaRecorderRef.current.start(100) // Collect data every 100ms
+
+        // Set max duration timeout if specified
+        if (maxDurationMs > 0) {
+          maxDurationTimeoutRef.current = setTimeout(() => {
+            if (stopRecordingRef.current) {
+              stopRecordingRef.current()
+            }
+          }, maxDurationMs)
+        }
 
         // Start level monitoring
         updateAudioLevel()
@@ -192,6 +241,12 @@ export function useAudioRecorder(options: UseAudioRecorderOptions = {}) {
   )
 
   const stopRecording = useCallback(() => {
+    // Clear max duration timeout
+    if (maxDurationTimeoutRef.current) {
+      clearTimeout(maxDurationTimeoutRef.current)
+      maxDurationTimeoutRef.current = null
+    }
+
     // Stop animation frame
     if (animationFrameRef.current) {
       cancelAnimationFrame(animationFrameRef.current)
@@ -212,6 +267,8 @@ export function useAudioRecorder(options: UseAudioRecorderOptions = {}) {
       audioContextRef.current.close()
     }
 
+    silenceStartRef.current = null
+
     setState((prev) => ({
       ...prev,
       isRecording: false,
@@ -219,6 +276,9 @@ export function useAudioRecorder(options: UseAudioRecorderOptions = {}) {
       audioLevel: 0,
     }))
   }, [])
+
+  // Store stopRecording ref for use in updateAudioLevel
+  stopRecordingRef.current = stopRecording
 
   const pauseRecording = useCallback(() => {
     if (mediaRecorderRef.current && mediaRecorderRef.current.state === 'recording') {

@@ -58,7 +58,8 @@ logger = logging.getLogger('kuiper.api')
 
 from fastapi import FastAPI, HTTPException, WebSocket, WebSocketDisconnect, UploadFile, File, Query, Request, status
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse, JSONResponse
+from fastapi.responses import FileResponse, JSONResponse, Response
+from fastapi import Body
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
 from fastapi.exceptions import RequestValidationError
 from pydantic import BaseModel, Field, ValidationError
@@ -75,6 +76,7 @@ from core.system_analyzer import SystemAnalyzer, SystemReport
 from core.audio_processor import AudioProcessor, AudioInfo, AudioDeviceInfo
 from core.data_preparer import DataPreparer, DatasetInfo, TextScript
 from core.trainer import Trainer, TrainingConfig, TrainingProgress, TrainingStatus
+from core.espeak import ESpeakNG
 
 
 # Global state
@@ -95,6 +97,9 @@ class AppState:
 
 
 state = AppState()
+
+# Initialize eSpeak NG (graceful fallback if not available)
+espeak = ESpeakNG()
 
 
 @asynccontextmanager
@@ -791,6 +796,51 @@ async def list_recordings():
         raise HTTPException(500, f"Failed to list recordings: {e}")
 
 
+@app.get("/api/recording/download")
+async def download_recordings():
+    """Download all recordings as a ZIP file."""
+    import zipfile
+    import io
+    from fastapi.responses import Response
+    
+    try:
+        recordings_dir = state.config.recordings_dir
+        
+        if not recordings_dir.exists():
+            raise HTTPException(404, "No recordings directory found")
+        
+        # Create ZIP in memory
+        zip_buffer = io.BytesIO()
+        
+        with zipfile.ZipFile(zip_buffer, 'w', zipfile.ZIP_DEFLATED) as zip_file:
+            # Get all WAV files
+            for wav_file in recordings_dir.glob("*.wav"):
+                try:
+                    with open(wav_file, 'rb') as f:
+                        zip_file.writestr(wav_file.name, f.read())
+                except Exception as e:
+                    logger.warning(f"Failed to add {wav_file.name} to ZIP: {e}")
+                    continue
+        
+        zip_buffer.seek(0)
+        
+        if zip_buffer.tell() == 0:
+            raise HTTPException(404, "No recordings found")
+        
+        return Response(
+            content=zip_buffer.read(),
+            media_type="application/zip",
+            headers={
+                "Content-Disposition": f"attachment; filename=recordings_{int(time())}.zip"
+            }
+        )
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Failed to create recordings ZIP: {e}")
+        raise HTTPException(500, f"Failed to create recordings ZIP: {e}")
+
+
 @app.get("/api/recording/progress", response_model=List[RecordingProgressResponse])
 async def get_recording_progress():
     """Get recording progress for each script."""
@@ -1209,6 +1259,33 @@ async def export_voice(request: ExportVoiceRequest):
 # ============================================================================
 # Audio File Serving
 # ============================================================================
+
+@app.post("/api/voice/pronounce")
+async def pronounce_text(
+    text: str = Body(..., embed=True),
+    voice: Optional[str] = Body(None, embed=True)
+):
+    """Generate pronunciation audio using eSpeak NG."""
+    if not espeak.is_available():
+        raise HTTPException(
+            status_code=503, 
+            detail="eSpeak NG not available. Please install espeak-ng."
+        )
+    
+    try:
+        output_path = espeak.generate_pronunciation(text, voice=voice)
+        
+        # Return file
+        return FileResponse(
+            output_path,
+            media_type='audio/wav',
+            filename='pronunciation.wav',
+            background=lambda: output_path.unlink() if output_path.exists() else None  # Cleanup after send
+        )
+    except Exception as e:
+        logger.error(f"Pronunciation failed: {e}")
+        raise HTTPException(500, f"Failed to generate pronunciation: {e}")
+
 
 @app.get("/api/voice/audio/{filename}")
 async def get_audio_file(filename: str):
