@@ -7,11 +7,11 @@ interface LayoutProps {
 }
 
 const navItems = [
-  { path: '/', icon: Cpu, label: 'System' },
+  { path: '/', icon: Mic, label: 'Record' },
   { path: '/setup', icon: Settings, label: 'Setup' },
-  { path: '/record', icon: Mic, label: 'Record' },
   { path: '/train', icon: FlaskConical, label: 'Train' },
   { path: '/test', icon: Play, label: 'Test' },
+  { path: '/welcome', icon: Cpu, label: 'System' },
 ]
 
 export function Layout({ children }: LayoutProps) {

@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { 
@@ -12,7 +12,6 @@ import {
   Check,
   Volume2,
   AlertCircle,
-  Loader2,
   Download,
   Play
 } from 'lucide-react'
@@ -45,6 +44,8 @@ export function Record() {
   const [draftBlob, setDraftBlob] = useState<Blob | null>(null)
   const [isRestoring, setIsRestoring] = useState(true)
   const [isPronouncing, setIsPronouncing] = useState(false)
+  const hasRestoredRef = useRef(false)
+  const justRestoredRef = useRef(false)
   const { announce } = useScreenReader()
 
   // Load scripts from backend
@@ -152,49 +153,54 @@ export function Record() {
     scripts
   )
 
-  // Restore state on mount
+  // Restore state on mount – run once after scripts are loaded so we can clamp position
   useEffect(() => {
+    if (isLoadingScripts || scripts.length === 0 || hasRestoredRef.current) return
+
     const restore = async () => {
       setIsRestoring(true)
+      hasRestoredRef.current = true
       const savedState = await restoreState()
-      
+      const loadedScripts = scripts
+
       if (savedState) {
-        // Restore scripts (if not already loaded)
-        if (savedState.scripts.length > 0 && scripts.length === 0) {
-          setScripts(savedState.scripts)
-        }
-        
-        // Restore recordings
-        const recordingsMap = new Map(savedState.recordings)
-        setRecordings(recordingsMap)
-        
-        // Restore position
-        if (savedState.session.currentScriptIndex < scripts.length) {
-          setCurrentScriptIndex(savedState.session.currentScriptIndex)
-        }
-        if (savedState.session.currentLineIndex < (scripts[savedState.session.currentScriptIndex]?.lines.length || 0)) {
-          setCurrentLineIndex(savedState.session.currentLineIndex)
-        }
-        
+        // Merge saved session recordings with current (API) recordings so we don't lose server state
+        setRecordings(prev => {
+          const next = new Map(prev)
+          for (const [k, v] of savedState.recordings) next.set(k, v)
+          return next
+        })
+
+        // Restore position clamped to current scripts (API may have different script list)
+        const scriptIdx = Math.min(
+          Math.max(0, savedState.session.currentScriptIndex),
+          loadedScripts.length - 1
+        )
+        const script = loadedScripts[scriptIdx]
+        const lineCount = script?.lines.length ?? 0
+        const lineIdx = lineCount > 0
+          ? Math.min(Math.max(0, savedState.session.currentLineIndex), lineCount - 1)
+          : 0
+
+        setCurrentScriptIndex(scriptIdx)
+        setCurrentLineIndex(lineIdx)
+
         // Restore draft blob if exists
-        if (savedState.session.draftBlob) {
+        if (savedState.session.draftBlob?.blob) {
           setDraftBlob(savedState.session.draftBlob.blob)
           setRecorderState('draft')
         }
-        
-        // Show restoration notification
+
+        justRestoredRef.current = true
         const restoreTime = new Date(savedState.timestamp).toLocaleTimeString()
         announce(`Restored session from ${restoreTime}`)
       }
-      
+
       setIsRestoring(false)
     }
-    
-    // Only restore after scripts are loaded
-    if (!isLoadingScripts) {
-      restore()
-    }
-  }, [isLoadingScripts])
+
+    restore()
+  }, [isLoadingScripts, scripts])
 
   // Handle save draft
   const handleSave = async () => {
@@ -321,8 +327,12 @@ export function Record() {
     setSaveError(null)
   }
 
-  // Auto-skip on mount and after save
+  // Auto-skip after save (do not run right after restore, so we keep "where you left off")
   useEffect(() => {
+    if (justRestoredRef.current) {
+      justRestoredRef.current = false
+      return
+    }
     if (!isRestoring && scripts.length > 0 && recordings.size > 0) {
       const key = `${scripts[currentScriptIndex]?.name}_${(currentLineIndex + 1).toString().padStart(4, '0')}`
       if (recordings.has(key)) {
@@ -447,31 +457,21 @@ export function Record() {
     visible: { opacity: 1, y: 0 },
   }
 
-  // Show restoration indicator
+  // Show restoration indicator (plain div for fast paint on slow machines)
   if (isRestoring) {
     return (
-      <motion.div
-        className="max-w-4xl mx-auto flex flex-col items-center justify-center min-h-[60vh]"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-      >
-        <Loader2 size={48} className="animate-spin text-accent mb-4" />
-        <p className="text-body-lg text-text-secondary">Restoring session...</p>
-      </motion.div>
+      <div className="max-w-4xl mx-auto flex flex-col items-center justify-center min-h-[50vh] text-text-secondary text-body">
+        Restoring session…
+      </div>
     )
   }
 
-  // Loading state
+  // Loading state (no animation to keep old PCs responsive)
   if (isLoadingScripts) {
     return (
-      <motion.div
-        className="max-w-4xl mx-auto flex flex-col items-center justify-center min-h-[60vh]"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-      >
-        <Loader2 size={48} className="animate-spin text-accent mb-4" />
-        <p className="text-body-lg text-text-secondary">Loading scripts...</p>
-      </motion.div>
+      <div className="max-w-4xl mx-auto flex flex-col items-center justify-center min-h-[50vh] text-text-secondary text-body">
+        Loading scripts…
+      </div>
     )
   }
 
