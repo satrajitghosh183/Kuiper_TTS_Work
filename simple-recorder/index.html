@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Simple TTS Recorder</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="container">
+    <h1>Voice Recorder</h1>
+
+    <section class="line-card">
+      <p id="line-text" class="line-text">Loading…</p>
+      <p id="line-info" class="line-info">—</p>
+    </section>
+
+    <section class="controls">
+      <label class="field">
+        <span>Microphone</span>
+        <select id="mic-select">
+          <option value="">Default microphone</option>
+        </select>
+      </label>
+
+      <div class="record-row">
+        <button type="button" id="btn-prev" class="btn btn-ghost" title="Previous line">← Prev</button>
+        <button type="button" id="btn-record" class="btn btn-record" title="Record / Stop">
+          <span id="record-label">Record</span>
+        </button>
+        <button type="button" id="btn-next" class="btn btn-ghost" title="Next line">Next →</button>
+      </div>
+
+      <div id="after-record" class="after-record hidden">
+        <button type="button" id="btn-save" class="btn btn-primary">Save</button>
+        <button type="button" id="btn-redo" class="btn btn-ghost">Redo</button>
+      </div>
+
+      <p id="status" class="status"></p>
+    </section>
+  </div>
+  <script src="app.js"></script>
+</body>
+</html>

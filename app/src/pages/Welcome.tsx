@@ -120,7 +120,7 @@ export function Welcome() {
   if (serverAvailable === false) {
     return (
       <motion.div
-        className="max-w-4xl mx-auto"
+        className="max-w-4xl mx-auto w-full"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
       >
@@ -185,7 +185,7 @@ export function Welcome() {
 
   return (
     <motion.div
-      className="max-w-4xl mx-auto"
+      className="max-w-4xl mx-auto w-full"
       variants={containerVariants}
       initial="hidden"
       animate="visible"
@@ -226,7 +226,7 @@ export function Welcome() {
           ) : (
             <div className="space-y-4">
               {/* GPU */}
-              <div className="flex items-center justify-between py-3 border-b border-border">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 py-3 border-b border-border">
                 <div className="flex items-center gap-3">
                   <Gauge size={20} className="text-text-muted" />
                   <div>
@@ -241,7 +241,7 @@ export function Welcome() {
               </div>
 
               {/* RAM */}
-              <div className="flex items-center justify-between py-3 border-b border-border">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 py-3 border-b border-border">
                 <div className="flex items-center gap-3">
                   <MemoryStick size={20} className="text-text-muted" />
                   <div>
@@ -257,7 +257,7 @@ export function Welcome() {
               </div>
 
               {/* Storage */}
-              <div className="flex items-center justify-between py-3 border-b border-border">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 py-3 border-b border-border">
                 <div className="flex items-center gap-3">
                   <HardDrive size={20} className="text-text-muted" />
                   <div>
@@ -273,7 +273,7 @@ export function Welcome() {
               </div>
 
               {/* CUDA/MPS */}
-              <div className="flex items-center justify-between py-3">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 py-3">
                 <div className="flex items-center gap-3">
                   <Cpu size={20} className="text-text-muted" />
                   <div>
@@ -321,7 +321,7 @@ export function Welcome() {
         <Card variant="elevated" className="mb-lg">
           <h2 className="text-h3 text-text-primary mb-md">Training Estimate</h2>
           
-          <div className="grid grid-cols-3 gap-4 mb-md">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-md">
             <div className="text-center p-4 bg-background rounded-lg">
               <p className="text-h2 text-accent mb-1">{estimates?.time100 || '~30m'}</p>
               <p className="text-caption text-text-muted">100 sentences</p>
@@ -338,7 +338,7 @@ export function Welcome() {
             </div>
           </div>
 
-          <div className="flex gap-4 text-caption text-text-secondary">
+          <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 text-caption text-text-secondary">
             <span>Recommended batch size: <span className="text-text-primary font-mono">{estimates?.batchSize || 32}</span></span>
             <span>Optimal epochs: <span className="text-text-primary font-mono">{estimates?.epochs || 2000}</span></span>
           </div>
@@ -346,7 +346,7 @@ export function Welcome() {
       </motion.div>
 
       {/* Overall Status */}
-      <motion.div variants={itemVariants} className="flex items-center justify-between">
+      <motion.div variants={itemVariants} className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
         <div className="flex items-center gap-3">
           <StatusBadge 
             status={
